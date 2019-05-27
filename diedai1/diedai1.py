@@ -1,5 +1,3 @@
-
-
 import json
 from tqdm import tqdm
 import os
@@ -104,7 +102,7 @@ def seq_padding(X, padding=0):
 
 
 class data_generator: #针对训练数据的处理
-    def __init__(self, data, batch_size=32):
+    def __init__(self, data, batch_size=8):
         self.data = data
         self.batch_size = batch_size
         self.steps = len(self.data) // self.batch_size
@@ -358,31 +356,16 @@ Batch=BatchNormalization(epsilon=1e-06, mode=0, axis=-1, momentum=0.9, weights=N
 
 x1 = embedding(x1) #char embedding
 x1 = position(x1)
-x1 =Attention(8,16)([x1,x1,x1])#self attention
-x1 = Dense(8*16,activation='relu')(x1)
-x1 = Dense(8*16,activation='linear')(x1)
-x1 = Batch(x1)
-x1 =Attention(8,16)([x1,x1,x1])#self attention
-x1 = Dense(8*16,activation='relu')(x1)
-x1 = Dense(8*16,activation='linear')(x1)
-x1 = Batch(x1)
-x1 =Attention(8,16)([x1,x1,x1])#self attention
-x1 = Dense(8*16,activation='relu')(x1)
-x1 = Dense(8*16,activation='linear')(x1)
-x1 = Batch(x1)
-x1 =Attention(8,16)([x1,x1,x1])#self attention
-x1 = Dense(8*16,activation='relu')(x1)
-x1 = Dense(8*16,activation='linear')(x1)
-x1 = Batch(x1)
-x1 =Attention(8,16)([x1,x1,x1])#self attention
-x1 = Dense(8*16,activation='relu')(x1)
-x1 = Dense(8*16,activation='linear')(x1)
-x1 = Batch(x1)
-x1 =Attention(8,16)([x1,x1,x1])#self attention
-x1 = Dense(8*16,activation='relu')(x1)
-x1 = Dense(8*16,activation='linear')(x1)
-x1 = Batch(x1)
 x1 = Dropout(0.2)(x1)
+x1 =Attention(8,16)([x1,x1,x1])#self attention
+x1 = Dense(8*16,activation='relu')(x1)
+x1 = Dense(8*16,activation='linear')(x1)
+x1 =Attention(8,16)([x1,x1,x1])#self attention
+x1 = Dense(8*16,activation='relu')(x1)
+x1 = Dense(8*16,activation='linear')(x1)
+x1 =Attention(8,16)([x1,x1,x1])#self attention
+x1 = Dense(8*16,activation='relu')(x1)
+x1 = Dense(8*16,activation='linear')(x1)
 x1 = Lambda(lambda x: x[0] * x[1])([x1, x1_mask])
 x1 = Bidirectional(CuDNNLSTM(char_size//2, return_sequences=True))(x1)
 x1 = Lambda(lambda x: x[0] * x[1])([x1, x1_mask])
@@ -402,6 +385,15 @@ x1 = Conv1D(char_size, 3, padding='same')(x1)
 x2 = embedding(x2)
 x2 = position(x2)
 x2 = Dropout(0.2)(x2)
+x2 =Attention(8,16)([x2,x2,x2])#self attention
+x2 = Dense(8*16,activation='relu')(x2)
+x2 = Dense(8*16,activation='linear')(x2)
+x2 =Attention(8,16)([x2,x2,x2])#self attention
+x2 = Dense(8*16,activation='relu')(x2)
+x2 = Dense(8*16,activation='linear')(x2)
+x2 =Attention(8,16)([x2,x2,x2])#self attention
+x2 = Dense(8*16,activation='relu')(x2)
+x2 = Dense(8*16,activation='linear')(x2)
 x2 = Lambda(lambda x: x[0] * x[1])([x2, x2_mask])
 x2 = Bidirectional(CuDNNLSTM(char_size//2, return_sequences=True))(x2)
 x2 = Lambda(lambda x: x[0] * x[1])([x2, x2_mask])
@@ -412,7 +404,7 @@ x2 = Lambda(seq_maxpool)([x2, x2_mask])
 # x2 =Attention(8,16)([x2,x2,x2])
 x12 = Multiply()([x1, x2])
 # x23 = Interact()([x12,x3,x2_mask])
-x = Concatenate()([x1,x12])
+x = Concatenate()([x1,x2,x12])
 x = Dense(char_size, activation='relu')(x)
 pt = Dense(1, activation='sigmoid')(x)
 t_model = Model([x1_in, x2_in, y_in], pt)  #输出识别实体的对应在知识库中的编号
